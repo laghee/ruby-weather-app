@@ -8,39 +8,44 @@ auth_token = "d7f180e90e1f5859ffd8fe7d9db97794"
 forecast_string = ''
 
 @client = Twilio::REST::Client.new(account_sid, auth_token)
-
  
-def get_locations_weather(location)
+def get_localized_weather(location)
   Barometer.new(location).measure
 end
- 
 
-weather = get_locations_weather('Milan')
+def format(forecast)
+	forecast.gsub!("partly", "partly\s")
+	forecast.gsub!("mostly", "mostly\s")
+	forecast.gsub!("chance", "chance\sof\s")
+	forecast.gsub("tstorms", "thunderstorms")
+end
+
+weather = get_localized_weather('Milan')
 tomorrow = Time.now.strftime('%d').to_i + 1
 
-puts 'Today is going to be ' + weather.current.condition.downcase + ' with a low of ' + 
- 	weather.today.low.f.to_s + ' and a high of ' + weather.today.high.f.to_s
+	puts "Today's forecast: " + weather.current.condition.downcase + ' with a low of ' + 
+ 		weather.today.low.f.to_s + ' and a high of ' + weather.today.high.f.to_s
 
-forecast_string += 'Today is going to be ' + weather.current.condition.downcase + ' with a low of ' + 
- 	weather.today.low.f.to_s + ' and a high of ' + weather.today.high.f.to_s + "\n"
+	forecast_string += "Today's forecast: " + weather.current.condition.downcase + ' with a low of ' + 
+ 		weather.today.low.f.to_s + ' and a high of ' + weather.today.high.f.to_s + "\n"
  
-weather.forecast.each do |forecast|
+	weather.forecast.each do |forecast|
 
-	day = forecast.starts_at.day
+		day = forecast.starts_at.day
 
-	if 
-		day == tomorrow
-		dayName = 'Tomorrow'
-	else
-		dayName = forecast.starts_at.strftime('%A')
+		if 
+			day == tomorrow
+			dayName = 'Tomorrow'
+		else
+			dayName = forecast.starts_at.strftime('%A')
+		end
+
+ 		puts dayName + ': ' + format(forecast.icon) + ' with a low of ' + 
+ 			forecast.low.f.to_s + ' and a high of ' + forecast.high.f.to_s
+
+ 		forecast_string += dayName + ': ' + format(forecast.icon) + ' with a low of ' + 
+ 			forecast.low.f.to_s + ' and a high of ' + forecast.high.f.to_s + "\n"
 	end
-
- 	puts dayName + ' is going to be ' + forecast.icon + ' with a low of ' + 
- 		forecast.low.f.to_s + ' and a high of ' + forecast.high.f.to_s
-
- 	forecast_string += dayName + ' is going to be ' + forecast.icon + ' with a low of ' + 
- 		forecast.low.f.to_s + ' and a high of ' + forecast.high.f.to_s + "\n"
-end
 
 message = @client.account.messages.create(
 	:from => "+15597154875",
@@ -61,11 +66,5 @@ Twilio::TwiML::Response.new do |r|
         r.Message "#{@@forecast_string}"
 
 end.text
-	
-puts 'Today is going to be ' + weather.current.condition.downcase + ' with a low of ' + 
- 		weather.today.low.f.to_s + ' and a high of ' + weather.today.high.f.to_s
 
-puts dayName + ' is going to be ' + forecast.icon + ' with a low of ' + 
- 		forecast.low.f.to_s + ' and a high of ' + forecast.high.f.to_s
-	
 =end
