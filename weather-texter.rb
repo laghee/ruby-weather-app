@@ -13,39 +13,28 @@ def get_localized_weather(location)
   Barometer.new(location).measure
 end
 
-def format(forecast)
-	forecast.gsub!("partly", "partly\s")
-	forecast.gsub!("mostly", "mostly\s")
-	forecast.gsub!("chance", "chance\sof\s")
-	forecast.gsub("tstorms", "thunderstorms")
+weather = get_localized_weather('Milan')
+tomorrow = Time.now.strftime('%-d').to_i + 1
+
+forecast_string += "Today's forecast: " + weather.current.condition.downcase + ' with a low of ' + 
+ 	weather.today.low.f.to_s + ' and a high of ' + weather.today.high.f.to_s + "\n"
+ 
+weather.forecast.each do |forecast|
+	day = forecast.starts_at.day
+
+	if day == tomorrow
+		dayName = 'Tomorrow'
+	else
+		dayName = forecast.starts_at.strftime('%A')
+	end
+
+forecast_string += dayName + ': ' + forecast.icon + ' with a low of ' + forecast.low.f.to_s +
+	' and a high of ' + forecast.high.f.to_s + "\n"
 end
 
-weather = get_localized_weather('Milan')
-tomorrow = Time.now.strftime('%d').to_i + 1
+forecast_string = forecast_string.gsub(/partly/, 'partly ').gsub(/mostly/, 'mostly ').gsub(/chance/, 'chance of ').gsub(/tstorms/, 'thunderstorms')
 
-	puts "Today's forecast: " + weather.current.condition.downcase + ' with a low of ' + 
- 		weather.today.low.f.to_s + ' and a high of ' + weather.today.high.f.to_s
-
-	forecast_string += "Today's forecast: " + weather.current.condition.downcase + ' with a low of ' + 
- 		weather.today.low.f.to_s + ' and a high of ' + weather.today.high.f.to_s + "\n"
- 
-	weather.forecast.each do |forecast|
-
-		day = forecast.starts_at.day
-
-		if 
-			day == tomorrow
-			dayName = 'Tomorrow'
-		else
-			dayName = forecast.starts_at.strftime('%A')
-		end
-
- 		puts dayName + ': ' + format(forecast.icon) + ' with a low of ' + 
- 			forecast.low.f.to_s + ' and a high of ' + forecast.high.f.to_s
-
- 		forecast_string += dayName + ': ' + format(forecast.icon) + ' with a low of ' + 
- 			forecast.low.f.to_s + ' and a high of ' + forecast.high.f.to_s + "\n"
-	end
+puts forecast_string
 
 message = @client.account.messages.create(
 	:from => "+15597154875",
@@ -54,9 +43,6 @@ message = @client.account.messages.create(
 	)
 
 puts message.to
-
-
-
 
 
 =begin
