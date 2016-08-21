@@ -32,7 +32,7 @@ forecast_string += dayName + ': ' + forecast.icon + ' with a low of ' + forecast
 	' and a high of ' + forecast.high.f.to_s + "\n"
 end
 
-forecast_string = forecast_string.gsub(/partly/, 'partly ').gsub(/mostly/, 'mostly ').gsub(/chance/, 'chance of ').gsub(/tstorms/, 'thunderstorms')
+forecast_string = forecast_string.gsub(/partly(?!\s)/, 'partly ').gsub(/mostly(?!\s)/, 'mostly ').gsub(/chance(?!\s)/, 'chance of ').gsub(/tstorms/, 'thunderstorms')
 
 puts forecast_string
 
